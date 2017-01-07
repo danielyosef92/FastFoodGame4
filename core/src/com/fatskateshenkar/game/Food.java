@@ -16,7 +16,8 @@ import static com.fatskateshenkar.game.Game.gameHendler;
 
 public class Food {
     Texture sprite;
-    float velocity = 14;
+    float speed = 14;
+    float velocity = speed;
     float yPostion;
     float width;
     float height;

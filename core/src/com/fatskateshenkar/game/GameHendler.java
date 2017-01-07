@@ -20,23 +20,30 @@ public class GameHendler {
     SpriteBatch batch;
     Texture background;
     Texture background2;
+    Texture sky,road,skyLineClose,skyLineFar,trees ;
     int gameState  = 0;
     Random randdomGenerator;
+
     public int level = 0;
     int score = 0;
     BitmapFont font;
     float screenHight = Gdx.graphics.getHeight();
     float screenWidth = Gdx.graphics.getWidth();
     boolean boom =false;
-    float backgroundX = 0;
-    float getBackgroundVelocity = 4;
+    float skyX = 0,roadX = 0,treesX =0,closeX=0,farX=0;
+    float skyV = 2,roadV = 4,treesV =3,closeV=2,farV=1f ;
     Rectangle fatboyRect;
     float timeStete =0f;
-
+    int scoreHit = 5;
     public GameHendler() {
         batch = new SpriteBatch();
         background = new Texture("bg2.png");
         background2 = new Texture("bg2.png");
+        sky = new Texture("sky.png");
+        skyLineClose = new Texture("skyLineCloser.png");
+        skyLineFar = new Texture("skyLineFar.png");
+        road = new Texture("road.png");
+        trees = new Texture("trees.png");
         randdomGenerator = new Random();
         fatBoy = new FatBoy();
         food = new Food();
@@ -67,11 +74,15 @@ public class GameHendler {
 
     public void colison(){
         if (Intersector.overlaps(gameHendler.fatBoy.rectangle,gameHendler.food.rectangle)){
-            food.xPos = screenWidth + 70 +fatBoy.getWidth();
+            food.xPos = screenWidth + fatBoy.startingX +fatBoy.getWidth();
             food.yPostion = food.randY();
-            score-=5;
+            if (score - scoreHit <0){
+                score = 0;
+            }
+            else {
+                score-=scoreHit;
+            }
         }
-
     }
     public void initFont(){
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Arcon.ttf"));
@@ -90,6 +101,81 @@ public class GameHendler {
     }
     public void drowFont(){
         font.draw(gameHendler.batch,String.valueOf(gameHendler.score),gameHendler.screenWidth-(gameHendler.screenWidth*1/8),gameHendler.screenHight-(gameHendler.screenHight*1/8));
+    }
+    public void backgroundDrow(){
+        gameHendler.getBatch().draw(sky, skyX, 0, gameHendler.screenWidth, gameHendler.screenHight );
+        gameHendler.getBatch().draw(sky, gameHendler.skyX +gameHendler.screenWidth, 0, gameHendler.screenWidth, gameHendler.screenHight );
+
+        gameHendler.getBatch().draw(skyLineFar, farX,screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/2);
+        gameHendler.getBatch().draw(skyLineFar, farX+gameHendler.screenWidth, screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/2 );
+
+        gameHendler.getBatch().draw(skyLineClose, closeX,screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/2-screenHight/5 );
+        gameHendler.getBatch().draw(skyLineClose, closeX +gameHendler.screenWidth, screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/2-screenHight/5 );
+
+        gameHendler.getBatch().draw(trees, treesX,screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/10 );
+        gameHendler.getBatch().draw(trees, treesX +gameHendler.screenWidth, screenHight/6, gameHendler.screenWidth, gameHendler.screenHight/10 );
+
+        gameHendler.getBatch().draw(road, roadX, 0, gameHendler.screenWidth, gameHendler.screenHight/6);
+        gameHendler.getBatch().draw(road, roadX +gameHendler.screenWidth, 0, gameHendler.screenWidth, gameHendler.screenHight/6);
+    }
+    public void backgroundCalcPostion(){
+        if (gameHendler.skyX == -(gameHendler.screenWidth)){
+            gameHendler.skyX = 0;
+            roadX  = 0;
+        }
+        if (roadX == -(screenWidth)){
+            roadX = 0;
+        }
+        if (treesX == -(screenWidth)){
+            treesX = 0;
+        }
+        if (closeX == -(screenWidth)){
+            closeX = 0;
+        }
+        if (farX == -(screenWidth)){
+            farX = 0;
+        }
+    }
+    public void gameRuner(){
+        if (gameHendler.gameState != 0) {
+            gameHendler.skyX -= gameHendler.skyV;
+            roadX -= roadV;
+            treesX -= treesV;
+            closeX -= closeV;
+            farX -= farV;
+            gameHendler.burnCal();
+            //input checking
+            gameHendler.inputChaking();
+
+            //food logic
+            gameHendler.food.foodMovment();
+            gameHendler.food.calcRectangle();
+//            gameHendler.food.drow();
+            //jump
+            gameHendler.fatBoy.jumpLogic();
+
+            //strat game by tuche
+        } else {
+            if (Gdx.input.justTouched()) {
+                Gdx.app.log("Touched", "yep");
+                gameHendler.gameState = 1;
+            }
+        }
+    }
+    public void speedGame(){
+        float l1=food.speed,l2=food.speed*1.5f,l3=food.speed*2,l4=food.speed*3;
+        if (score<=10){
+            food.velocity = l1;
+        }
+        else if(score<=30){
+            food.velocity = l2;
+        }
+        else if (score<=60){
+            food.velocity = l3;
+        }
+        else {
+            food.velocity=l4;
+        }
     }
 
 }
